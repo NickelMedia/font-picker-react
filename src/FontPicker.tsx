@@ -9,7 +9,7 @@ import {
 	SortOption,
 	Variant,
 } from "@imposium-hub/font-manager";
-import React, { KeyboardEvent, PureComponent, ReactElement } from "react";
+import * as React from 'react';
 
 type LoadingStatus = "loading" | "finished" | "error";
 
@@ -19,7 +19,7 @@ interface Props {
 
 	// Optional props
 	activeFontFamily: string;
-	onChange: (font: Font) => void;
+	onChange: (font: String) => void;
 	pickerId: string;
 	families: string[];
 	categories: Category[];
@@ -35,14 +35,7 @@ interface State {
 	loadingStatus: LoadingStatus;
 }
 
-/**
- * Return the fontId based on the provided font family
- */
-function getFontId(fontFamily: string): string {
-	return fontFamily.replace(/\s+/g, "-").toLowerCase();
-}
-
-export default class FontPicker extends PureComponent<Props, State> {
+export default class FontPicker extends React.PureComponent<Props, State> {
 	// Instance of the FontManager class used for managing, downloading and applying fonts
 	fontManager: FontManager;
 
@@ -160,7 +153,7 @@ export default class FontPicker extends PureComponent<Props, State> {
 	/**
 	 * Update the active font on font button click
 	 */
-	onSelection = (e: React.MouseEvent | KeyboardEvent): void => {
+	onSelection = (e: React.MouseEvent | React.KeyboardEvent): void => {
 		const target = e.target as HTMLButtonElement;
 		const activeFontFamily = target.textContent;
 		if (!activeFontFamily) {
@@ -181,29 +174,27 @@ export default class FontPicker extends PureComponent<Props, State> {
 	/**
 	 * Generate <ul> with all font families
 	 */
-	generateFontList = (fonts: Font[]): ReactElement => {
+	generateFontList = (): React.ReactElement => {
 		const { activeFontFamily } = this.props;
-		const { loadingStatus } = this.state;
 
-		if (loadingStatus !== "finished") {
-			return <div />;
-		}
 		return (
 			<ul className="font-list">
-				{fonts.map(
-					(font): ReactElement => {
-						const isActive = font.family === activeFontFamily;
-						const fontId = getFontId(font.family);
+				{this.props.families.map(
+					(font): React.ReactElement => {
+						const isActive = font === activeFontFamily;
+						// const fontId = getFontId(font.family);
 						return (
-							<li key={fontId} className="font-list-item">
+							<li key={font} className="font-list-item">
 								<button
 									type="button"
-									id={`font-button-${fontId}${this.fontManager.selectorSuffix}`}
+									id={`font-button-${font}${this.fontManager.selectorSuffix}`}
 									className={`font-button ${isActive ? "active-font" : ""}`}
 									onClick={this.onSelection}
 									onKeyPress={this.onSelection}
+
+                                    style={{fontFamily: font}}
 								>
-									{font.family}
+									{font}
 								</button>
 							</li>
 						);
@@ -232,15 +223,9 @@ export default class FontPicker extends PureComponent<Props, State> {
 		}
 	};
 
-	render = (): ReactElement => {
-		const { activeFontFamily, sort } = this.props;
-		const { expanded, loadingStatus } = this.state;
-
-		// Extract and sort font list
-		const fonts = Array.from(this.fontManager.getFonts().values());
-		if (sort === "alphabet") {
-			fonts.sort((font1: Font, font2: Font): number => font1.family.localeCompare(font2.family));
-		}
+	render = (): React.ReactElement => {
+		const { activeFontFamily } = this.props;
+		const { expanded } = this.state;
 
 		// Render font picker button and attach font list to it
 		return (
@@ -255,9 +240,9 @@ export default class FontPicker extends PureComponent<Props, State> {
 					onKeyPress={this.toggleExpanded}
 				>
 					<p className="dropdown-font-family">{activeFontFamily}</p>
-					<p className={`dropdown-icon ${loadingStatus}`} />
+					<p className={`dropdown-icon finished`} />
 				</button>
-				{loadingStatus === "finished" && this.generateFontList(fonts)}
+				{this.generateFontList()}
 			</div>
 		);
 	};

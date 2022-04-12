@@ -885,10 +885,10 @@
   "resolved" "https://registry.npmjs.org/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz"
   "version" "0.2.5"
 
-"@imposium-hub/font-manager@^1.4.0":
-  "integrity" "sha512-SHi272tEamb4WnkXHuAxABkXZvzG0dU6JMjaGKAgLaZUQDaanLVDjvegek2qwVKm0Dmybg9Os6krDkF8sWb8Iw=="
-  "resolved" "https://registry.npmjs.org/@imposium-hub/font-manager/-/font-manager-1.4.3.tgz"
-  "version" "1.4.3"
+"@imposium-hub/font-manager@^1.4.5":
+  "integrity" "sha512-t4uM2rIbq4zDBW5Fi0pTDFNaupS48JMrPRALqcY9fkNQf8vTGXGRPOi1NRGTgBex1tdTYJbQjjwk8KAQ4xcfzQ=="
+  "resolved" "https://registry.npmjs.org/@imposium-hub/font-manager/-/font-manager-1.4.5.tgz"
+  "version" "1.4.5"
   dependencies:
     "@babel/runtime" "^7.9.2"
 
