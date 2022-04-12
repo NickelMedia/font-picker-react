@@ -8,7 +8,7 @@ import {
 	Script,
 	SortOption,
 	Variant,
-} from "@samuelmeuli/font-manager";
+} from "@imposium-hub/font-manager";
 import React, { KeyboardEvent, PureComponent, ReactElement } from "react";
 
 type LoadingStatus = "loading" | "finished" | "error";

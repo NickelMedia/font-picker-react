@@ -40,7 +40,7 @@
 		"release": "np"
 	},
 	"dependencies": {
-		"@samuelmeuli/font-manager": "^1.4.0"
+		"@imposium-hub/font-manager": "^1.4.0"
 	},
 	"peerDependencies": {
 		"@types/react": "^16.0.0",
