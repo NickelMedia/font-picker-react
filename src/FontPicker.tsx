@@ -11,15 +11,13 @@ import {
 } from "@imposium-hub/font-manager";
 import * as React from 'react';
 
-type LoadingStatus = "loading" | "finished" | "error";
-
 interface Props {
 	// Required props
 	apiKey: string;
 
 	// Optional props
 	activeFontFamily: string;
-	onChange: (font: String) => void;
+	onChange: (font: string) => void;
 	pickerId: string;
 	families: string[];
 	categories: Category[];
@@ -32,7 +30,6 @@ interface Props {
 
 interface State {
 	expanded: boolean;
-	loadingStatus: LoadingStatus;
 }
 
 export default class FontPicker extends React.PureComponent<Props, State> {
@@ -53,8 +50,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	};
 
 	state: Readonly<State> = {
-		expanded: false,
-		loadingStatus: "loading",
+		expanded: false
 	};
 
 	constructor(props: Props) {
@@ -93,16 +89,8 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		// Generate font list
 		this.fontManager
 			.init()
-			.then((): void => {
-				this.setState({
-					loadingStatus: "finished",
-				});
-			})
+			.then()
 			.catch((err: Error): void => {
-				// On error: Log error message
-				this.setState({
-					loadingStatus: "error",
-				});
 				console.error("Error trying to fetch the list of available fonts");
 				console.error(err);
 			});
@@ -175,11 +163,11 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	 * Generate <ul> with all font families
 	 */
 	generateFontList = (): React.ReactElement => {
-		const { activeFontFamily } = this.props;
+		const { activeFontFamily, families } = this.props;
 
 		return (
 			<ul className="font-list">
-				{this.props.families.map(
+				{families.map(
 					(font): React.ReactElement => {
 						const isActive = font === activeFontFamily;
 						// const fontId = getFontId(font.family);
@@ -240,7 +228,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 					onKeyPress={this.toggleExpanded}
 				>
 					<p className="dropdown-font-family">{activeFontFamily}</p>
-					<p className={`dropdown-icon finished`} />
+					<p className="dropdown-icon finished" />
 				</button>
 				{this.generateFontList()}
 			</div>
