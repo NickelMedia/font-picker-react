@@ -1,19 +1,19 @@
-import typescript from "rollup-plugin-typescript2";
+import typescript from 'rollup-plugin-typescript2';
 
-import pkg from "./package.json";
+import pkg from './package.json';
 
 export default {
-	input: "./src/FontPicker.tsx",
+	input: './src/FontPicker.tsx',
 	output: [
 		{
 			file: pkg.main,
-			format: "cjs",
+			format: 'cjs'
 		},
 		{
 			file: pkg.module,
-			format: "es",
-		},
+			format: 'es'
+		}
 	],
-	external: ["@samuelmeuli/font-manager", "react"],
-	plugins: [typescript()],
+	external: ['@imposium-hub/font-manager', 'react'],
+	plugins: [typescript()]
 };
