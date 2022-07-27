@@ -1,6 +1,6 @@
 {
 	"name": "@imposium-hub/font-picker-react",
-	"version": "3.5.6",
+	"version": "3.5.7",
 	"description": "Font selector component for Google Fonts",
 	"repository": "https://github.com/NickelMedia/font-picker-react",
 	"homepage": "https://font-picker.samuelmeuli.com",
@@ -39,9 +39,9 @@
 		"release": "np"
 	},
 	"dependencies": {
+		"@imposium-hub/font-manager": "^1.4.7",
 		"react": "^17.0.1",
-		"react-dom": "^16.10.2",
-		"@imposium-hub/font-manager": "^1.4.7"
+		"react-dom": "^16.10.2"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.9.0",
