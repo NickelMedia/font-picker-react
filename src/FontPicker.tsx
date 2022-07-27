@@ -119,6 +119,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	};
 
 	createFontStyleSheets = (availableFonts?: any): void => {
+		console.log('createFontStyleSheets');
 		const { defaultFonts } = this.props;
 		defaultFonts.map((font: any) => {
 			const fontId = font.name.toLowerCase().split(' ').join('-');
@@ -134,6 +135,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	};
 
 	fillFontStyleSheets = (fontId: string, font: any) => {
+		console.log('fillFontStyleSheets');
 		let stylesheetNode = document.getElementById(`font-${fontId}`);
 		const { weight, file, url, name, family } = font;
 		if (stylesheetNode === null) {
