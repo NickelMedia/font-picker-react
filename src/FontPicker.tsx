@@ -7,7 +7,7 @@ import {
 	OPTIONS_DEFAULTS,
 	Script,
 	SortOption,
-	Variant,
+	Variant
 } from '@imposium-hub/font-manager';
 import * as React from 'react';
 
@@ -47,7 +47,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		variants: OPTIONS_DEFAULTS.variants,
 		filter: OPTIONS_DEFAULTS.filter,
 		limit: OPTIONS_DEFAULTS.limit,
-		sort: OPTIONS_DEFAULTS.sort,
+		sort: OPTIONS_DEFAULTS.sort
 	};
 
 	constructor(props: any) {
@@ -64,12 +64,12 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			filter,
 			limit,
 			sort,
-			onChange,
+			onChange
 		} = this.props;
 
 		this.state = {
 			expanded: false
-		}
+		};
 		const options: Options = {
 			pickerId,
 			families,
@@ -78,7 +78,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			variants,
 			filter,
 			limit,
-			sort,
+			sort
 		};
 
 		// Initialize FontManager object
@@ -104,7 +104,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	 */
 	componentDidUpdate = (prevProps: any) => {
 		const { activeFontFamily, onChange, customFonts } = this.props;
-		if (prevProps.customFonts !== customFonts){
+		if (prevProps.customFonts !== customFonts) {
 			this.createFontStyleSheets(customFonts);
 		}
 		// If active font prop has changed: Update font family in font manager and component state
@@ -120,26 +120,26 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 
 	createFontStyleSheets = (availableFonts?: any): void => {
 		const { defaultFonts } = this.props;
-        defaultFonts.map((font: any) => {
-            const fontId = font.name.toLowerCase().split(' ').join('-');
-            this.fillFontStyleSheets(fontId, font);
-        });
+		defaultFonts.map((font: any) => {
+			const fontId = font.name.toLowerCase().split(' ').join('-');
+			this.fillFontStyleSheets(fontId, font);
+		});
 
-        if (availableFonts) {
-            availableFonts.map((font: any) => {
-                const fontId = font.name.toLowerCase();
-                this.fillFontStyleSheets(fontId, font);
-            });
-        }
-    }
+		if (availableFonts) {
+			availableFonts.map((font: any) => {
+				const fontId = font.name.toLowerCase();
+				this.fillFontStyleSheets(fontId, font);
+			});
+		}
+	};
 
-    fillFontStyleSheets = (fontId: string, font: any) => {
-        let stylesheetNode = document.getElementById(`font-${fontId}`);
-        const { weight, file, url, name, family } = font;
-        if (stylesheetNode === null) {
-			stylesheetNode = stylesheetNode
-            stylesheetNode = document.createElement('style') as HTMLElement;
-			if(stylesheetNode !== null){
+	fillFontStyleSheets = (fontId: string, font: any) => {
+		let stylesheetNode = document.getElementById(`font-${fontId}`);
+		const { weight, file, url, name, family } = font;
+		if (stylesheetNode === null) {
+			stylesheetNode = stylesheetNode;
+			stylesheetNode = document.createElement('style') as HTMLElement;
+			if (stylesheetNode !== null) {
 				stylesheetNode.id = `font-${fontId}`;
 				stylesheetNode.setAttribute('data-is-preview', 'true');
 
@@ -155,15 +155,17 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 
 				document.head.appendChild(stylesheetNode);
 			}
-        }
-    }
+		}
+	};
 
 	/**
 	 * EventListener for closing the font picker when clicking anywhere outside it
 	 */
 	onClose = (e: MouseEvent) => {
 		let targetEl = e.target as Node; // Clicked element
-		const fontPickerEl = document.getElementById(`font-picker${this.fontManager.selectorSuffix}`);
+		const fontPickerEl = document.getElementById(
+			`font-picker${this.fontManager.selectorSuffix}`
+		);
 
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
@@ -210,28 +212,26 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		const { activeFontFamily, families } = this.props;
 
 		return (
-			<ul className="font-list">
-				{families.map(
-					(font): React.ReactElement => {
-						const isActive = font === activeFontFamily;
-						// const fontId = getFontId(font.family);
-						return (
-							<li key={font} className="font-list-item">
-								<button
-									type="button"
-									id={`font-button-${font}${this.fontManager.selectorSuffix}`}
-									className={`font-button ${isActive ? 'active-font' : ''}`}
-									onClick={this.onSelection}
-									onKeyPress={this.onSelection}
-
-                                    style={{fontFamily: font}}
-								>
-									{font}
-								</button>
-							</li>
-						);
-					},
-				)}
+			<ul className='font-list'>
+				{families.map((font): React.ReactElement => {
+					const isActive = font === activeFontFamily;
+					// const fontId = getFontId(font.family);
+					return (
+						<li
+							key={font}
+							className='font-list-item'>
+							<button
+								type='button'
+								id={`font-button-${font}${this.fontManager.selectorSuffix}`}
+								className={`font-button ${isActive ? 'active-font' : ''}`}
+								onClick={this.onSelection}
+								onKeyPress={this.onSelection}
+								style={{ fontFamily: font }}>
+								{font}
+							</button>
+						</li>
+					);
+				})}
 			</ul>
 		);
 	};
@@ -244,12 +244,12 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 
 		if (expanded) {
 			this.setState({
-				expanded: false,
+				expanded: false
 			});
 			document.removeEventListener('click', () => this.onClose);
 		} else {
 			this.setState({
-				expanded: true,
+				expanded: true
 			});
 			document.addEventListener('click', () => this.onClose);
 		}
@@ -263,16 +263,14 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		return (
 			<div
 				id={`font-picker${this.fontManager.selectorSuffix}`}
-				className={expanded ? 'expanded' : ''}
-			>
+				className={expanded ? 'expanded' : ''}>
 				<button
-					type="button"
-					className="dropdown-button"
+					type='button'
+					className='dropdown-button'
 					onClick={this.toggleExpanded}
-					onKeyPress={this.toggleExpanded}
-				>
-					<p className="dropdown-font-family">{activeFontFamily}</p>
-					<p className="dropdown-icon finished" />
+					onKeyPress={this.toggleExpanded}>
+					<p className='dropdown-font-family'>{activeFontFamily}</p>
+					<p className='dropdown-icon finished' />
 				</button>
 				{this.generateFontList()}
 			</div>
