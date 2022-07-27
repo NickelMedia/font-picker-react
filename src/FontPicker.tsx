@@ -8,7 +8,7 @@ import {
 	Script,
 	SortOption,
 	Variant,
-} from "@imposium-hub/font-manager";
+} from '@imposium-hub/font-manager';
 import * as React from 'react';
 
 interface Props {
@@ -26,6 +26,8 @@ interface Props {
 	filter: (font: Font) => boolean;
 	limit: number;
 	sort: SortOption;
+	defaultFonts: any;
+	customFonts?: any;
 }
 
 interface State {
@@ -38,7 +40,6 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 
 	static defaultProps = {
 		activeFontFamily: FONT_FAMILY_DEFAULT,
-		onChange: (): void => {}, // eslint-disable-line @typescript-eslint/no-empty-function
 		pickerId: OPTIONS_DEFAULTS.pickerId,
 		families: OPTIONS_DEFAULTS.families,
 		categories: OPTIONS_DEFAULTS.categories,
@@ -49,11 +50,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		sort: OPTIONS_DEFAULTS.sort,
 	};
 
-	state: Readonly<State> = {
-		expanded: false
-	};
-
-	constructor(props: Props) {
+	constructor(props: any) {
 		super(props);
 
 		const {
@@ -70,6 +67,9 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			onChange,
 		} = this.props;
 
+		this.state = {
+			expanded: false
+		}
 		const options: Options = {
 			pickerId,
 			families,
@@ -85,13 +85,15 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		this.fontManager = new FontManager(apiKey, activeFontFamily, options, onChange);
 	}
 
-	componentDidMount = (): void => {
+	componentDidMount = () => {
+		const { customFonts } = this.props;
+		this.createFontStyleSheets(customFonts);
 		// Generate font list
 		this.fontManager
 			.init()
 			.then()
 			.catch((err: Error): void => {
-				console.error("Error trying to fetch the list of available fonts");
+				console.error('Error trying to fetch the list of available fonts');
 				console.error(err);
 			});
 	};
@@ -100,9 +102,11 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	 * After every component update, check whether the activeFontFamily prop has changed. If so,
 	 * call this.setActiveFontFamily with the new font
 	 */
-	componentDidUpdate = (prevProps: Props): void => {
-		const { activeFontFamily, onChange } = this.props;
-
+	componentDidUpdate = (prevProps: any) => {
+		const { activeFontFamily, onChange, customFonts } = this.props;
+		if (prevProps.customFonts !== customFonts){
+			this.createFontStyleSheets(customFonts);
+		}
 		// If active font prop has changed: Update font family in font manager and component state
 		if (activeFontFamily !== prevProps.activeFontFamily) {
 			this.setActiveFontFamily(activeFontFamily);
@@ -114,10 +118,50 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		}
 	};
 
+	createFontStyleSheets = (availableFonts?: any): void => {
+		const { defaultFonts } = this.props;
+        defaultFonts.map((font: any) => {
+            const fontId = font.name.toLowerCase().split(' ').join('-');
+            this.fillFontStyleSheets(fontId, font);
+        });
+
+        if (availableFonts) {
+            availableFonts.map((font: any) => {
+                const fontId = font.name.toLowerCase();
+                this.fillFontStyleSheets(fontId, font);
+            });
+        }
+    }
+
+    fillFontStyleSheets = (fontId: string, font: any) => {
+        let stylesheetNode = document.getElementById(`font-${fontId}`);
+        const { weight, file, url, name, family } = font;
+        if (stylesheetNode === null) {
+			stylesheetNode = stylesheetNode
+            stylesheetNode = document.createElement('style') as HTMLElement;
+			if(stylesheetNode !== null){
+				stylesheetNode.id = `font-${fontId}`;
+				stylesheetNode.setAttribute('data-is-preview', 'true');
+
+				const fontWeight = weight ? `font-weight: ${weight};` : '';
+				const fontUrl = file ? `fonts/${file}` : `${url}`;
+
+				stylesheetNode.textContent = `
+				@font-face {
+					font-family: ${name !== family ? name : family};
+					${fontWeight}
+					src: url(${fontUrl});
+				}`;
+
+				document.head.appendChild(stylesheetNode);
+			}
+        }
+    }
+
 	/**
 	 * EventListener for closing the font picker when clicking anywhere outside it
 	 */
-	onClose = (e: MouseEvent): void => {
+	onClose = (e: MouseEvent) => {
 		let targetEl = e.target as Node; // Clicked element
 		const fontPickerEl = document.getElementById(`font-picker${this.fontManager.selectorSuffix}`);
 
@@ -162,7 +206,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	/**
 	 * Generate <ul> with all font families
 	 */
-	generateFontList = (): React.ReactElement => {
+	generateFontList = () => {
 		const { activeFontFamily, families } = this.props;
 
 		return (
@@ -176,7 +220,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 								<button
 									type="button"
 									id={`font-button-${font}${this.fontManager.selectorSuffix}`}
-									className={`font-button ${isActive ? "active-font" : ""}`}
+									className={`font-button ${isActive ? 'active-font' : ''}`}
 									onClick={this.onSelection}
 									onKeyPress={this.onSelection}
 
@@ -202,16 +246,16 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			this.setState({
 				expanded: false,
 			});
-			document.removeEventListener("click", this.onClose);
+			document.removeEventListener('click', () => this.onClose);
 		} else {
 			this.setState({
 				expanded: true,
 			});
-			document.addEventListener("click", this.onClose);
+			document.addEventListener('click', () => this.onClose);
 		}
 	};
 
-	render = (): React.ReactElement => {
+	render = () => {
 		const { activeFontFamily } = this.props;
 		const { expanded } = this.state;
 
@@ -219,7 +263,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		return (
 			<div
 				id={`font-picker${this.fontManager.selectorSuffix}`}
-				className={expanded ? "expanded" : ""}
+				className={expanded ? 'expanded' : ''}
 			>
 				<button
 					type="button"
