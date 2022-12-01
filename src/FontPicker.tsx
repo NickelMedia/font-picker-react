@@ -7,7 +7,8 @@ import {
 	OPTIONS_DEFAULTS,
 	Script,
 	SortOption,
-	Variant
+	Variant,
+	FontList
 } from '@imposium-hub/font-manager';
 import * as React from 'react';
 
@@ -32,6 +33,7 @@ interface Props {
 
 interface State {
 	expanded: boolean;
+	fonts: any;
 }
 
 export default class FontPicker extends React.PureComponent<Props, State> {
@@ -64,12 +66,14 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			filter,
 			limit,
 			sort,
-			onChange
+			onChange,
 		} = this.props;
 
 		this.state = {
-			expanded: false
+			expanded: false,
+			fonts: null,
 		};
+
 		const options: Options = {
 			pickerId,
 			families,
@@ -86,16 +90,31 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	}
 
 	componentDidMount = () => {
-		const { customFonts } = this.props;
-		this.createFontStyleSheets(customFonts);
+		// const { customFonts, defaultFonts } = this.props;
 		// Generate font list
-		this.fontManager
-			.init()
-			.then()
-			.catch((err: Error): void => {
-				console.error('Error trying to fetch the list of available fonts');
-				console.error(err);
-			});
+		// this.fontManager
+		// 	.init()
+		// 	.then((fontMap: FontList): void => {
+		// 		const fonts = Array.from(fontMap.values());
+		// 		const gFonts: any = fonts.filter(f => f.files);
+		// 		// console.log(this.props.defaultFonts)
+		// 		// console.log(gFonts)
+		// 		const test = defaultFonts.map((f: any) => gFonts.find((o: any) => o.family === f.family) || f)
+		// 		const uniqueFam = new Set();
+		// 		const unique = test.filter((e: any) => {
+		// 			const isDup = uniqueFam.has(e.family);
+		// 			uniqueFam.add(e.family);
+		// 			if(!isDup){
+		// 				return true;
+		// 			}
+		// 			return false;
+		// 		})
+		// 		this.setState({fonts: unique},() =>	this.createFontStyleSheets(customFonts))
+		// 	})
+		// 	.catch((err: Error): void => {
+		// 		console.error('Error trying to fetch the list of available fonts');
+		// 		console.error(err);
+		// 	});
 	};
 
 	/**
@@ -103,9 +122,32 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	 * call this.setActiveFontFamily with the new font
 	 */
 	componentDidUpdate = (prevProps: any) => {
-		const { activeFontFamily, onChange, customFonts } = this.props;
+		const { activeFontFamily, onChange, customFonts, defaultFonts } = this.props;
+
 		if (prevProps.customFonts !== customFonts) {
-			this.createFontStyleSheets(customFonts);
+			this.fontManager
+			.init()
+			.then((fontMap: FontList): void => {
+				const fonts = Array.from(fontMap.values());
+				const gFonts: any = fonts.filter(f => f.files);
+				// console.log(this.props.defaultFonts)
+				// console.log(gFonts)
+				const test = defaultFonts.map((f: any) => gFonts.find((o: any) => o.family === f.family) || f)
+				const uniqueFam = new Set();
+				const unique = test.filter((e: any) => {
+					const isDup = uniqueFam.has(e.family);
+					uniqueFam.add(e.family);
+					if(!isDup){
+						return true;
+					}
+					return false;
+				})
+				this.setState({fonts: unique},() =>	this.createFontStyleSheets(customFonts))
+			})
+			.catch((err: Error): void => {
+				console.error('Error trying to fetch the list of available fonts');
+				console.error(err);
+			});
 		}
 		// If active font prop has changed: Update font family in font manager and component state
 		if (activeFontFamily !== prevProps.activeFontFamily) {
@@ -119,11 +161,42 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	};
 
 	createFontStyleSheets = (availableFonts?: any): void => {
-		console.log('createFontStyleSheets');
 		const { defaultFonts } = this.props;
+		// console.log(this.state.fonts)
 		defaultFonts.map((font: any) => {
+			const fonts = (this.state.fonts.find((f: any) => f.family === font.family))
 			const fontId = font.name.toLowerCase().split(' ').join('-');
-			this.fillFontStyleSheets(fontId, font);
+			// let url;
+			if(fonts?.file){
+				this.fillFontStyleSheets(fontId, font);
+			}
+
+			if(fonts?.files){
+				const FONT_BASE_URL = 'https://fonts.googleapis.com/css';
+				const fontURL = new URL(FONT_BASE_URL);
+				const FONT_FACE_REGEX = /@font-face {([\s\S]*?)}/gm;
+				if(font.weight === 400){
+					// url = fonts.files.regular;
+					fontURL.searchParams.append('family', `${font.family}:regular`);
+					fontURL.searchParams.append('font-display', 'swap');
+					// console.log(fontURL.href)
+
+					this.get(fontURL.href).then(res => {
+						const rule = this.getMatches(FONT_FACE_REGEX, res);
+						this.fillGoogleStyleSheets(fontId, rule[0], font.family)
+					}).catch((e) => console.error(e))
+					// this.fillFontStyleSheets(fontId, font, url);
+				} else {
+					// url = fonts.files[font.weight];
+					fontURL.searchParams.append('family', `${font.family}:${font.weight}`);
+					fontURL.searchParams.append('font-display', 'swap');
+					this.get(fontURL.href).then(res => {
+						const rule = this.getMatches(FONT_FACE_REGEX, res);
+						this.fillGoogleStyleSheets(fontId, rule[0].replace(font.family, font.name), font.name)
+					}).catch((e) => console.error(e))
+				}
+			}
+
 		});
 
 		if (availableFonts) {
@@ -134,10 +207,63 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		}
 	};
 
-	fillFontStyleSheets = (fontId: string, font: any) => {
-		console.log('fillFontStyleSheets');
+	getMatches = (regex: RegExp, str: string): string[] => {
+		const matches: string[] = [];
+		let match;
+		do {
+			match = regex.exec(str);
+			if (match) {
+				matches.push(match[1]);
+			}
+		} while (match);
+		return matches;
+	}
+
+	get = (url: string): Promise<string> =>{
+		return new Promise((resolve, reject): void => {
+			const request = new XMLHttpRequest();
+			request.overrideMimeType('application/json');
+			request.open('GET', url, true);
+			request.onreadystatechange = (): void => {
+				// Request has completed
+				if (request.readyState === 4) {
+					if (request.status !== 200) {
+						// On error
+						reject(new Error(`Response has status code ${request.status}`));
+					} else {
+						// On success
+						resolve(request.responseText);
+					}
+				}
+			};
+			request.send();
+		});
+	}
+
+	fillGoogleStyleSheets = (fontId: string, font: string, name: any) => {
+		let stylesheetNode = document.getElementById(`font-${fontId}`);
+
+		if (stylesheetNode === null) {
+			stylesheetNode = stylesheetNode;
+			stylesheetNode = document.createElement('style') as HTMLElement;
+			if (stylesheetNode !== null) {
+				stylesheetNode.id = `font-${fontId}`;
+				stylesheetNode.setAttribute('data-is-preview', 'true');
+
+				stylesheetNode.textContent = `
+				@font-face {
+					${font.replace(`'${name}'`, name)}
+				}`;
+
+				document.head.appendChild(stylesheetNode);
+			}
+		}
+	};
+
+	fillFontStyleSheets = (fontId: string, font: any, gFont?: any) => {
 		let stylesheetNode = document.getElementById(`font-${fontId}`);
 		const { weight, file, url, name, family } = font;
+
 		if (stylesheetNode === null) {
 			stylesheetNode = stylesheetNode;
 			stylesheetNode = document.createElement('style') as HTMLElement;
@@ -146,7 +272,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 				stylesheetNode.setAttribute('data-is-preview', 'true');
 
 				const fontWeight = weight ? `font-weight: ${weight};` : '';
-				const fontUrl = file ? `fonts/${file}` : `${url}`;
+				const fontUrl = gFont ? gFont : (file ? `fonts/${file}` : `${url}` )
 
 				stylesheetNode.textContent = `
 				@font-face {
@@ -166,7 +292,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	onClose = (e: MouseEvent) => {
 		let targetEl = e.target as Node; // Clicked element
 		const fontPickerEl = document.getElementById(
-			`font-picker${this.fontManager.selectorSuffix}`
+			`font-picker`
 		);
 
 		// eslint-disable-next-line no-constant-condition
@@ -224,7 +350,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 							className='font-list-item'>
 							<button
 								type='button'
-								id={`font-button-${font}${this.fontManager.selectorSuffix}`}
+								id={`font-button-${font}`}
 								className={`font-button ${isActive ? 'active-font' : ''}`}
 								onClick={this.onSelection}
 								onKeyPress={this.onSelection}
@@ -264,7 +390,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		// Render font picker button and attach font list to it
 		return (
 			<div
-				id={`font-picker${this.fontManager.selectorSuffix}`}
+				id={`font-picker`}
 				className={expanded ? 'expanded' : ''}>
 				<button
 					type='button'
