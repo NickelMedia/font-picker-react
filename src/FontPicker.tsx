@@ -172,29 +172,16 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			}
 
 			if(fonts?.files){
-				const FONT_BASE_URL = 'https://fonts.googleapis.com/css';
+				const FONT_BASE_URL = 'https://fonts.googleapis.com/css2';
 				const fontURL = new URL(FONT_BASE_URL);
 				const FONT_FACE_REGEX = /@font-face {([\s\S]*?)}/gm;
-				if(font.weight === 400){
-					// url = fonts.files.regular;
-					fontURL.searchParams.append('family', `${font.family}:regular`);
-					fontURL.searchParams.append('font-display', 'swap');
-					// console.log(fontURL.href)
-
-					this.get(fontURL.href).then(res => {
-						const rule = this.getMatches(FONT_FACE_REGEX, res);
-						this.fillGoogleStyleSheets(fontId, rule[0], font.family)
-					}).catch((e) => console.error(e))
-					// this.fillFontStyleSheets(fontId, font, url);
-				} else {
-					// url = fonts.files[font.weight];
-					fontURL.searchParams.append('family', `${font.family}:${font.weight}`);
-					fontURL.searchParams.append('font-display', 'swap');
-					this.get(fontURL.href).then(res => {
-						const rule = this.getMatches(FONT_FACE_REGEX, res);
-						this.fillGoogleStyleSheets(fontId, rule[0].replace(font.family, font.name), font.name)
-					}).catch((e) => console.error(e))
-				}
+				fontURL.searchParams.append('family', `${font.family}:wght@${font.weight}`);
+				fontURL.searchParams.append('font-display', 'swap');
+				this.get(fontURL.href).then(res => {
+					const rule = this.getMatches(FONT_FACE_REGEX, res);
+					const updateFont = rule[rule.length - 1].replace(font.family, font.name)
+					this.fillGoogleStyleSheets(fontId, updateFont, font.name)
+				}).catch((e) => console.error(e))
 			}
 
 		});
