@@ -176,6 +176,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 				const fontURL = new URL(FONT_BASE_URL);
 				const FONT_FACE_REGEX = /@font-face {([\s\S]*?)}/gm;
 				fontURL.searchParams.append('family', `${font.family}:wght@${font.weight}`);
+				fontURL.searchParams.append('text', font.name);
 				fontURL.searchParams.append('font-display', 'swap');
 				this.get(fontURL.href).then(res => {
 					const rule = this.getMatches(FONT_FACE_REGEX, res);
