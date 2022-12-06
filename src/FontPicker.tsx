@@ -244,7 +244,6 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			`font-picker`
 		);
 
-		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			if (targetEl === fontPickerEl) {
 				// Click inside font picker: Exit
