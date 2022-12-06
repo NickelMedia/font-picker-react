@@ -102,8 +102,6 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			.then((fontMap: FontList): void => {
 				const fonts = Array.from(fontMap.values());
 				const gFonts: any = fonts.filter(f => f.files);
-				// console.log(this.props.defaultFonts)
-				// console.log(gFonts)
 				const test = defaultFonts.map((f: any) => gFonts.find((o: any) => o.family === f.family) || f)
 				const uniqueFam = new Set();
 				const unique = test.filter((e: any) => {
@@ -134,7 +132,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 
 	createFontStyleSheets = (availableFonts?: any): void => {
 		const { defaultFonts } = this.props;
-		// console.log(this.state.fonts)
+
 		defaultFonts.map((font: any) => {
 			const fonts = (this.state.fonts.find((f: any) => f.family === font.family))
 			const fontId = font.name.toLowerCase().split(' ').join('-');
@@ -153,7 +151,7 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 				this.get(fontURL.href).then(res => {
 					const rule = this.getMatches(FONT_FACE_REGEX, res);
 					const updateFont = rule[rule.length - 1].replace(font.family, font.name)
-					this.fillGoogleStyleSheets(fontId, updateFont, font.name)
+					this.fillFontStyleSheets(fontId, updateFont, font.name)
 				}).catch((e) => console.error(e))
 			}
 
@@ -200,30 +198,14 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 		});
 	}
 
-	fillGoogleStyleSheets = (fontId: string, font: string, name: any) => {
-		let stylesheetNode = document.getElementById(`font-${fontId}`);
-
-		if (stylesheetNode === null) {
-			stylesheetNode = stylesheetNode;
-			stylesheetNode = document.createElement('style') as HTMLElement;
-			if (stylesheetNode !== null) {
-				stylesheetNode.id = `font-${fontId}`;
-				stylesheetNode.setAttribute('data-is-preview', 'true');
-
-				stylesheetNode.textContent = `
-				@font-face {
-					${font.replace(`'${name}'`, name)}
-				}`;
-
-				document.head.appendChild(stylesheetNode);
-			}
-		}
-	};
-
-	fillFontStyleSheets = (fontId: string, font: any, gFont?: any) => {
+	fillFontStyleSheets = (fontId: string, font: any, fontName?: any) => {
 		let stylesheetNode = document.getElementById(`font-${fontId}`);
 		const { weight, file, url, name, family } = font;
 
+		const fontFamily = name !== family ? name : family;
+		const fontWeight = weight ? `font-weight: ${weight};` : '';
+		const fontUrl = file ? `fonts/${file}` : `${url}`;
+
 		if (stylesheetNode === null) {
 			stylesheetNode = stylesheetNode;
 			stylesheetNode = document.createElement('style') as HTMLElement;
@@ -231,15 +213,22 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 				stylesheetNode.id = `font-${fontId}`;
 				stylesheetNode.setAttribute('data-is-preview', 'true');
 
-				const fontWeight = weight ? `font-weight: ${weight};` : '';
-				const fontUrl = gFont ? gFont : (file ? `fonts/${file}` : `${url}` )
+				if(fontFamily && fontFamily && fontUrl){
+					stylesheetNode.textContent = `
+					@font-face {
+						font-family: ${fontFamily};
+						${fontWeight}
+						src: url(${fontUrl});
+					}`;
+				}
 
-				stylesheetNode.textContent = `
-				@font-face {
-					font-family: ${name !== family ? name : family};
-					${fontWeight}
-					src: url(${fontUrl});
-				}`;
+				if (fontName){
+					stylesheetNode.textContent = `
+					@font-face {
+						${font.replace(`'${fontName}'`, fontName)}
+					}`;
+				}
+
 
 				document.head.appendChild(stylesheetNode);
 			}
