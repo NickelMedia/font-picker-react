@@ -102,9 +102,9 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 			.then((fontMap: FontList): void => {
 				const fonts = Array.from(fontMap.values());
 				const gFonts: any = fonts.filter(f => f.files);
-				const test = defaultFonts.map((f: any) => gFonts.find((o: any) => o.family === f.family) || f)
+				const defaultUpdate = defaultFonts.map((f: any) => gFonts.find((o: any) => o.family === f.family) || f)
 				const uniqueFam = new Set();
-				const unique = test.filter((e: any) => {
+				const unique = defaultUpdate.filter((e: any) => {
 					const isDup = uniqueFam.has(e.family);
 					uniqueFam.add(e.family);
 					if(!isDup){
