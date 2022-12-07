@@ -95,24 +95,22 @@ export default class FontPicker extends React.PureComponent<Props, State> {
 	 */
 	componentDidUpdate = (prevProps: any) => {
 		const { activeFontFamily, onChange, customFonts, defaultFonts } = this.props;
-
 		if (prevProps.customFonts !== customFonts) {
 			this.fontManager
 			.init()
 			.then((fontMap: FontList): void => {
-				const fonts = Array.from(fontMap.values());
-				const gFonts: any = fonts.filter(f => f.files);
-				const defaultUpdate = defaultFonts.map((f: any) => gFonts.find((o: any) => o.family === f.family) || f)
-				const uniqueFam = new Set();
-				const unique = defaultUpdate.filter((e: any) => {
-					const isDup = uniqueFam.has(e.family);
-					uniqueFam.add(e.family);
+				const googleFonts = Array.from(fontMap.values()).filter(f => f.files);
+				const updateDefaultFonts = defaultFonts.map((f: any) => googleFonts.find((o: any) => o.family === f.family) || f)
+				const uniqueFontFamilies = new Set();
+				const uniqueFonts = updateDefaultFonts.filter((e: any) => {
+					const isDup = uniqueFontFamilies.has(e.family);
+					uniqueFontFamilies.add(e.family);
 					if(!isDup){
 						return true;
 					}
 					return false;
 				})
-				this.setState({fonts: unique},() =>	this.createFontStyleSheets(customFonts))
+				this.setState({fonts: uniqueFonts},() =>	this.createFontStyleSheets(customFonts))
 			})
 			.catch((err: Error): void => {
 				console.error('Error trying to fetch the list of available fonts');
