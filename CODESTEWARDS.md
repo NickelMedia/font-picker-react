@@ -4,8 +4,11 @@ Code stewards are a set of people who are very familiar with the repository and 
 
 ## Current Code Stewards
 
-1. ****
-   - Email: 
+1. **Greg Webber**
+   - Email: greg.webber@innovid.com
+
+2. **Edward Ma**
+   - Email: edward.ma@innovid.com
 
 ---
 
